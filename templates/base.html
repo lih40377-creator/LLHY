@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <title>{% block title %}知页 · 笔记工作台{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body data-clear-draft-key="{{ clear_draft_key }}">
+  {% if session.get('user_id') %}
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('admin') if session.get('role') == 'admin' else url_for('home') }}"><span class="brand-mark">✳</span> 知页 <small>NOTES</small></a>
+    <nav class="topnav" aria-label="主导航">
+      <a href="{{ url_for('admin') if session.get('role') == 'admin' else url_for('home') }}">工作台</a>
+      <a href="{{ url_for('search') }}">搜索</a>
+      <a href="{{ url_for('export') }}">备份与导出</a>
+      {% if session.get('role') == 'admin' %}<a href="{{ url_for('admin_notes') }}">管理笔记</a>{% endif %}
+    </nav>
+    <div class="account"><span class="avatar">{{ session.get('username','我')[0]|upper }}</span><span class="account-name">{{ session.get('username') }}</span><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="text-button" type="submit">退出</button></form></div>
+  </header>
+  {% endif %}
+  <main>{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-wrap" role="status">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}{% block content %}{% endblock %}</main>
+  <footer class="footer">知页 · 把想法留在这里</footer>
+</body>
+</html>

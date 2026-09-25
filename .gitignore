@@ -1,0 +1,13 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+instance/
+*.db
+.env
+.pytest_cache/
+.coverage
+我的学习笔记.txt
+我的学习笔记.pdf
+我的学习笔记.docx
+你好.txt
