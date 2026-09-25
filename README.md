@@ -35,6 +35,10 @@ python app.py
 
 运行测试：`python -m unittest discover -s tests -v`。
 
+## GitHub 中文界面扩展
+
+`github-zh-extension/` 是可安装到 Chrome / Edge 的本地扩展，只翻译 GitHub 常用界面，并可自定义保留英文的菜单项。安装步骤见该目录的 `README.md`。它不会读取本项目的笔记数据，也不会更改 GitHub 账号设置。
+
 ## 参考
 
 设计功能时参考了 [HTMLNotes](https://github.com/HTMLToolkit/HTMLNotes) 的导入导出与侧栏组织方式、[Neoma](https://github.com/infinitumio/neoma) 的标签与可迁移数据理念、[Flask 官方教程](https://flask.palletsprojects.com/en/stable/tutorial/) 的基础 Web 应用结构。未复制上述项目代码。
