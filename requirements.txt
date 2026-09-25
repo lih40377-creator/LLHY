@@ -1,5 +1,7 @@
 Flask>=3.1,<4
 Flask-SQLAlchemy>=3.1,<4
+Markdown>=3.7,<4
+nh3>=0.2,<1
 python-docx>=1.2,<2
 reportlab>=4.4,<5
 gunicorn>=23,<25; platform_system != "Windows"

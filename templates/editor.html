@@ -1,2 +1,33 @@
-{% extends 'base.html' %}{% block title %}{{ heading }} · 知页{% endblock %}
-{% block content %}<div class="content-page editor-page"><div class="backline"><a href="{{ url_for('note_detail', id=note.id) if note else url_for('home') }}">← 返回</a><span>笔记编辑器</span></div><div class="page-heading compact"><div><span class="eyebrow">CAPTURE YOUR IDEAS</span><h1>{{ heading }}</h1><p>将灵感、知识和思考写下来。</p></div></div><form method="post" class="editor-card" data-draft-key="{{ 'note-'+note.id|string if note else 'new-note' }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="title">标题 <span class="required">*</span></label><input class="title-input" id="title" name="title" maxlength="200" required autofocus value="{{ note.title if note else request.form.get('title','') }}" placeholder="给这篇笔记起个名字"><label for="tags">标签</label><input id="tags" name="tags" value="{{ note.tags or '' if note else request.form.get('tags','') }}" placeholder="例如：学习, 灵感, 项目（用逗号分隔）"><label for="content">正文</label><textarea id="content" name="content" rows="16" placeholder="在这里写下你的想法...">{{ note.content if note else request.form.get('content','') }}</textarea><div class="editor-bottom"><label class="checkbox-line"><input type="checkbox" name="is_pinned" value="1" {{ 'checked' if note and note.is_pinned else '' }}> 置顶这篇笔记</label><span class="muted" id="draft-status">输入内容会暂存在此浏览器</span></div><div class="editor-actions"><a class="button secondary" href="{{ url_for('note_detail', id=note.id) if note else url_for('home') }}">取消</a><button class="button primary" type="submit">保存笔记 →</button></div></form></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}{{ heading }} · 知页{% endblock %}
+{% block content %}
+<div class="content-page editor-page">
+  <div class="backline"><a href="{{ url_for('note_detail', id=note.id) if note else url_for('home') }}">← 返回笔记</a><span>支持 Markdown · 自动保存</span></div>
+  <div class="page-heading compact"><div><span class="eyebrow">A SPACE TO THINK</span><h1>{{ heading }}</h1><p>把零散的想法，写成清晰的记录。</p></div><span class="editor-badge">✦ 专注写作</span></div>
+  <form method="post" enctype="multipart/form-data" class="editor-card" data-draft-key="{{ 'note-' ~ note.id if note else 'new-note' }}" data-note-id="{{ note.id if note else '' }}" data-autosave-url="{{ url_for('autosave_note') }}" data-preview-url="{{ url_for('markdown_preview') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="note_id" value="{{ note.id if note else '' }}">
+    <div class="editor-intro"><span class="editor-intro-icon">✳</span><div><strong>{{ '继续完善这篇笔记' if note else '新的想法，从这里开始' }}</strong><small>内容会自动保存到你的账户</small></div></div>
+    <label for="title">标题 <span class="required">*</span></label>
+    <input class="title-input" id="title" name="title" maxlength="200" required autofocus value="{{ request.form.get('title', note.title if note else '') }}" placeholder="给这篇笔记起个名字">
+    <label for="tags">标签</label>
+    <input id="tags" name="tags" value="{{ request.form.get('tags', note.tags or '' if note else '') }}" placeholder="例如：学习, 灵感, 项目（用逗号分隔）">
+    <div class="editor-label-row"><label for="content">正文</label><span>Markdown</span></div>
+    <div class="markdown-toolbar" role="toolbar" aria-label="Markdown 格式工具">
+      <button type="button" data-md-before="## " data-md-after="" title="二级标题">H2</button>
+      <button type="button" data-md-before="**" data-md-after="**" title="加粗"><b>B</b></button>
+      <button type="button" data-md-before="*" data-md-after="*" title="斜体"><i>I</i></button>
+      <button type="button" data-md-before="- " data-md-after="" title="列表">☷</button>
+      <button type="button" data-md-before="- [ ] " data-md-after="" title="待办">☑</button>
+      <button type="button" data-md-before="`" data-md-after="`" title="行内代码">&lt;/&gt;</button>
+      <button type="button" data-md-before="&gt; " data-md-after="" title="引用">❝</button>
+      <button type="button" data-md-before="[" data-md-after="](https://)" title="链接">↗</button>
+      <span class="toolbar-hint">使用工具栏或直接输入 Markdown</span>
+    </div>
+    <div class="writing-area"><textarea id="content" name="content" rows="16" placeholder="在这里写下你的想法...">{{ request.form.get('content', note.content if note else '') }}</textarea><div class="markdown-preview" id="markdown-preview" aria-live="polite"><p class="muted">预览会显示在这里。</p></div></div>
+    <div class="editor-bottom"><label class="checkbox-line"><input type="checkbox" name="is_pinned" value="1" {{ 'checked' if note and note.is_pinned else '' }}> 置顶这篇笔记</label><span class="muted" id="word-count">0 字</span><span class="save-status" id="draft-status" role="status">准备就绪</span></div>
+    <div class="attachment-field"><label for="attachments">添加附件</label><p>支持 PNG、JPG、WebP 图片和 PDF；单个不超过 5 MB，一次最多 5 个。</p><input id="attachments" name="attachments" type="file" accept=".png,.jpg,.jpeg,.webp,.pdf" multiple></div>
+    <div class="editor-actions"><a class="button secondary" href="{{ url_for('note_detail', id=note.id) if note else url_for('home') }}">返回</a><button class="button primary" type="submit">完成并保存 →</button></div>
+  </form>
+</div>
+{% endblock %}

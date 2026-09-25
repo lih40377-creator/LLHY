@@ -5,10 +5,13 @@
 ## 功能
 
 - 账号注册与登录，旧版明文密码会在首次成功登录时自动升级为哈希
-- 笔记创建、编辑、删除、置顶、归档和标签
+- 笔记创建、编辑、置顶、归档、标签，以及可恢复的回收站
+- Markdown 工具栏、实时预览和安全的正文渲染
+- 服务端自动保存；新笔记输入后会生成草稿，网络异常时暂存于当前浏览器
+- 历史版本预览与恢复：手动保存记录版本，自动保存定期记录快照（每篇最多保留 100 个）
+- 图片和 PDF 附件；仅笔记所有者和管理员可访问，单个文件限 5 MB
 - 根据标题、内容、标签、日期搜索；桌面和手机均可使用
-- 编辑时在当前浏览器暂存草稿，保存仍需点击“保存笔记”
-- 导出 JSON、Markdown、TXT、Word 和 PDF；从 JSON 备份导入
+- 导出完整 ZIP、轻量 JSON、Markdown、TXT、Word 和 PDF；支持 ZIP/JSON 导入
 - 管理员查看和管理全站笔记
 
 ## 本地运行
@@ -24,11 +27,13 @@ python app.py
 
 打开 http://127.0.0.1:5000 。首次运行会在 `instance/notes.db` 创建数据库。旧项目已有的 `instance/notes.db` 会原地添加新字段，不删除旧笔记。
 
-生产环境应设置随机 `SECRET_KEY` 环境变量，并使用支持 Python/Flask 的主机运行 `gunicorn app:app`。如需外部数据库，可设置 `DATABASE_URL`。GitHub 仓库用于保存代码；GitHub Pages 不能运行 Flask 后端。个人数据库、密钥、虚拟环境和本地笔记文件已列入 `.gitignore`。
+生产环境应设置随机 `SECRET_KEY` 环境变量，并使用支持 Python/Flask 的主机运行 `gunicorn app:app`。如需外部数据库，可设置 `DATABASE_URL`。附件默认存储在 `instance/uploads/`，部署时该目录与数据库都需要持久化。GitHub 仓库用于保存代码；GitHub Pages 不能运行 Flask 后端。个人数据库、密钥、附件、虚拟环境和本地笔记文件已列入 `.gitignore`。
 
 ## 备份
 
-进入“备份与导出”下载 JSON 文件。导入会新增笔记，不覆盖已有内容，重复导入会产生副本。不要将备份文件或 `instance/notes.db` 提交到公开仓库。
+进入“备份与导出”下载 ZIP 文件，可保存所选笔记、历史版本和附件。回收站里的笔记需要先恢复再导出。JSON 只包含当前笔记文字与标签，不包含历史版本和附件。导入会新增笔记，不覆盖已有内容，重复导入会产生副本。导入文件限 30 MB。不要将备份文件或 `instance/notes.db` 提交到公开仓库。
+
+运行测试：`python -m unittest discover -s tests -v`。
 
 ## 参考
 

@@ -1,2 +1,32 @@
-{% extends 'base.html' %}{% block title %}{{ note.title }} · 知页{% endblock %}
-{% block content %}<div class="content-page detail-page"><div class="backline"><a href="{{ url_for('admin_notes') if session.get('role') == 'admin' else url_for('home') }}">← 返回笔记</a><span>{{ note.create_time.strftime('%Y年%m月%d日') }}</span></div><article class="detail-card"><div class="detail-top"><span class="eyebrow">MY NOTE / {{ '%04d'|format(note.id) }}</span><span class="status-pill">{{ '已归档' if note.is_archived else '已置顶' if note.is_pinned else '笔记' }}</span></div><h1>{{ note.title }}</h1><div class="detail-meta">创建于 {{ note.create_time.strftime('%Y-%m-%d %H:%M') }}{% if note.updated_at %} · 更新于 {{ note.updated_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}</div><div class="card-tags">{% for tag in note.tag_list %}<a href="{{ url_for('home', tag=tag) }}">#{{ tag }}</a>{% endfor %}</div><div class="note-body">{{ note.content }}</div><div class="detail-actions"><a class="button primary" href="{{ url_for('edit', id=note.id) }}">✎ 编辑笔记</a><form method="post" action="{{ url_for('toggle_note', id=note.id, action='pin') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button secondary" type="submit">{{ '取消置顶' if note.is_pinned else '置顶' }}</button></form><form method="post" action="{{ url_for('toggle_note', id=note.id, action='archive') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button secondary" type="submit">{{ '取消归档' if note.is_archived else '归档' }}</button></form><form method="post" action="{{ url_for('delete', id=note.id) }}" data-confirm="确定删除这篇笔记吗？此操作无法撤销。"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button danger" type="submit">删除</button></form></div></article></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}{{ note.title }} · 知页{% endblock %}
+{% block content %}
+<div class="content-page detail-page">
+  <div class="backline"><a href="{{ url_for('admin_notes') if session.get('role') == 'admin' else url_for('home', view='trash' if note.deleted_at else 'active') }}">← 返回笔记</a><span>{{ note.create_time.strftime('%Y年%m月%d日') }}</span></div>
+  <article class="detail-card">
+    <div class="detail-top"><span class="eyebrow">MY NOTE / {{ '%04d'|format(note.id) }}</span><span class="status-pill">{{ '回收站' if note.deleted_at else '草稿' if note.is_draft else '已归档' if note.is_archived else '已置顶' if note.is_pinned else '笔记' }}</span></div>
+    <h1>{{ note.title }}</h1>
+    <div class="detail-meta">创建于 {{ note.create_time.strftime('%Y-%m-%d %H:%M') }}{% if note.updated_at %} · 更新于 {{ note.updated_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}</div>
+    <div class="card-tags">{% for tag in note.tag_list %}<a href="{{ url_for('home', tag=tag) }}">#{{ tag }}</a>{% endfor %}</div>
+    <div class="note-body markdown-body">{{ note.content|render_markdown }}</div>
+    <div class="detail-actions">
+      {% if note.deleted_at %}
+      <form method="post" action="{{ url_for('restore_note', id=note.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button primary" type="submit">↶ 恢复笔记</button></form>
+      <form method="post" action="{{ url_for('purge_note', id=note.id) }}" data-confirm="确定永久删除这篇笔记及其附件吗？此操作无法撤销。"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button danger" type="submit">永久删除</button></form>
+      {% else %}
+      <a class="button primary" href="{{ url_for('edit', id=note.id) }}">✎ 继续编辑</a>
+      <form method="post" action="{{ url_for('toggle_note', id=note.id, action='pin') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button secondary" type="submit">{{ '取消置顶' if note.is_pinned else '置顶' }}</button></form>
+      <form method="post" action="{{ url_for('toggle_note', id=note.id, action='archive') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button secondary" type="submit">{{ '取消归档' if note.is_archived else '归档' }}</button></form>
+      <form method="post" action="{{ url_for('delete', id=note.id) }}" data-confirm="将这篇笔记移入回收站？之后仍可恢复。"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button danger" type="submit">移入回收站</button></form>
+      {% endif %}
+    </div>
+  </article>
+  <div class="detail-sections">
+    <section class="detail-section"><div class="section-heading"><h2>附件 <span class="section-count">{{ note.attachments|length }}</span></h2></div>
+      {% if note.attachments %}<div class="attachment-list">{% for attachment in note.attachments %}<div class="attachment-item">{% if attachment.mime_type.startswith('image/') %}<a href="{{ url_for('get_attachment', attachment_id=attachment.id) }}" target="_blank" rel="noopener"><img src="{{ url_for('get_attachment', attachment_id=attachment.id) }}" alt="{{ attachment.original_name }}"></a>{% else %}<span class="pdf-icon">PDF</span>{% endif %}<div><a href="{{ url_for('get_attachment', attachment_id=attachment.id, download=1) }}">{{ attachment.original_name }}</a><small>{{ (attachment.size / 1024)|round(1) }} KB</small></div>{% if not note.deleted_at %}<form method="post" action="{{ url_for('delete_attachment', attachment_id=attachment.id) }}" data-confirm="确定删除这个附件吗？"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="text-button" aria-label="删除附件 {{ attachment.original_name }}">删除</button></form>{% endif %}</div>{% endfor %}</div>{% else %}<p class="muted empty-inline">尚未添加附件</p>{% endif %}
+      {% if not note.deleted_at %}<form class="inline-upload" method="post" enctype="multipart/form-data" action="{{ url_for('upload_attachments', id=note.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="file" name="attachments" accept=".png,.jpg,.jpeg,.webp,.pdf" multiple required><button type="submit" class="button secondary small">添加附件</button></form>{% endif %}
+    </section>
+    <section class="detail-section"><div class="section-heading"><h2>版本历史 <span class="section-count">{{ note.revisions|length }}</span></h2><a href="{{ url_for('note_versions', id=note.id) }}">查看全部 →</a></div><p class="muted section-description">每次完成保存都会记录版本，自动保存也会定期生成快照。</p><div class="version-list">{% for revision in revisions[:4] %}<a href="{{ url_for('version_detail', id=note.id, revision_id=revision.id) }}"><span class="version-dot"></span><span>{{ revision.saved_at.strftime('%Y-%m-%d %H:%M') }}<small>{{ revision.title }}</small></span><span>↗</span></a>{% else %}<p class="muted empty-inline">暂无历史版本</p>{% endfor %}</div></section>
+  </div>
+</div>
+{% endblock %}
