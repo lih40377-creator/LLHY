@@ -29,6 +29,8 @@ python app.py
 
 生产环境应设置随机 `SECRET_KEY` 环境变量，并使用支持 Python/Flask 的主机运行 `gunicorn app:app`。如需外部数据库，可设置 `DATABASE_URL`。附件默认存储在 `instance/uploads/`，部署时该目录与数据库都需要持久化。GitHub 仓库用于保存代码；GitHub Pages 不能运行 Flask 后端。个人数据库、密钥、附件、虚拟环境和本地笔记文件已列入 `.gitignore`。
 
+免费公网部署可按 [PythonAnywhere 中文步骤](docs/公网部署-PythonAnywhere.md) 操作。线上站点使用独立数据库，新用户可以公开注册，各自的笔记仅在登录后可见。`/healthz` 可用于检查应用与数据库是否正常。
+
 ## 备份
 
 进入“备份与导出”下载 ZIP 文件，可保存所选笔记、历史版本和附件。回收站里的笔记需要先恢复再导出。JSON 只包含当前笔记文字与标签，不包含历史版本和附件。导入会新增笔记，不覆盖已有内容，重复导入会产生副本。导入文件限 30 MB。不要将备份文件或 `instance/notes.db` 提交到公开仓库。

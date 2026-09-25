@@ -36,6 +36,7 @@ app.config.update(
     MAX_CONTENT_LENGTH=30 * 1024 * 1024,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("PUBLIC_HTTPS") == "1",
 )
 db.init_app(app)
 UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR") or Path(app.instance_path) / "uploads")
@@ -55,6 +56,13 @@ def migrate_database():
 
 
 migrate_database()
+
+
+@app.get("/healthz")
+def healthz():
+    """A small public endpoint for hosting health checks."""
+    db.session.execute(text("SELECT 1"))
+    return jsonify(status="ok")
 
 
 @app.before_request
