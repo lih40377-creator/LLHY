@@ -18,9 +18,9 @@
 <body>
   <h1>GitHub 界面中文助手</h1>
   <label class="switch"><input id="enabled" type="checkbox">开启界面翻译</label>
-  <label for="preserved">保持英文的界面项</label>
+  <label for="preserved">显示中英对照的界面项</label>
   <textarea id="preserved" spellcheck="false" aria-describedby="help"></textarea>
-  <p id="help">每行写一个完整的英文按钮或菜单名。Git、PR、issue 等专业词在默认译文中也会保留英文。</p>
+  <p id="help">每行写一个完整英文标签，例如 Issues。词库有译文时会同时显示中文和英文；无译文时保持英文。Git、PR 等专业词也会保留。</p>
   <p id="status" role="status"></p>
   <script src="popup.js"></script>
 </body>

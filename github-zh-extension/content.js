@@ -30,12 +30,12 @@
     "Owner": "所有者", "Repository name": "仓库名称", "Description": "简介",
     "Add a README file": "添加 README 文件", "Choose a license": "选择许可证",
     "Add .gitignore": "添加 .gitignore", "Initialize this repository": "初始化此仓库",
-    "Issues": "议题", "New issue": "新建 issue", "Issue": "issue",
-    "Pull requests": "PR", "New pull request": "新建 PR", "Compare & pull request": "比较并创建 PR",
+    "Issues": "任务与问题", "New issue": "新建 issue", "Issue": "issue",
+    "Pull requests": "合并申请", "New pull request": "新建 PR", "Compare & pull request": "比较并创建 PR",
     "Open": "未关闭", "Closed": "已关闭", "Merged": "已 merge",
     "Review changes": "审查更改", "Files changed": "变更的文件", "Conversation": "讨论",
     "Checks": "检查", "Projects": "项目", "Discussions": "讨论区", "Wiki": "Wiki",
-    "Actions": "Actions", "Security": "安全", "Insights": "洞察",
+    "Actions": "自动化", "Security": "安全", "Insights": "洞察",
     "People": "成员", "Teams": "团队", "Organizations": "组织",
     "Pinned": "已置顶", "Recently updated": "最近更新", "Sort": "排序", "Filter": "筛选",
     "All": "全部", "Clear": "清除", "Apply": "应用", "View more": "查看更多",
@@ -46,7 +46,42 @@
     "Write": "编辑", "Comment": "评论", "Add a comment": "添加评论",
     "Edit profile": "编辑个人资料", "Edit repository details": "编辑仓库信息",
     "Pin": "置顶", "Unpin": "取消置顶", "Archive": "归档", "Unarchive": "取消归档",
-    "You don't have any repositories yet.": "你还没有仓库。"
+    "You don't have any repositories yet.": "你还没有仓库。",
+
+    // GitHub Marketplace navigation and common listing descriptions.
+    "Featured": "精选", "Apps": "应用", "App": "应用", "Action": "Action",
+    "All apps": "全部应用", "Agent apps": "Agent 应用", "AI Assisted": "AI 辅助",
+    "API management": "API 管理", "Backup Utilities": "备份工具", "Chat": "聊天",
+    "Code quality": "代码质量", "Code review": "代码审查", "Code Scanning Ready": "支持代码扫描",
+    "Code search": "代码搜索", "Container CI": "容器 CI", "Continuous integration": "持续集成",
+    "Dependency management": "依赖管理", "Deployment": "部署", "Deployment Protection Rules": "部署保护规则",
+    "Desktop tools": "桌面工具", "IDEs": "IDE 开发工具", "Learning": "学习",
+    "Localization": "本地化", "Mobile": "移动端", "Mobile CI": "移动端 CI",
+    "Monitoring": "监控", "Open Source management": "开源项目管理",
+    "Project management": "项目管理", "Publishing": "发布", "Recently added": "最近添加",
+    "Reporting": "报告", "Support": "支持", "Sustainability": "可持续发展",
+    "Testing": "测试", "Time tracking": "时间追踪", "Utilities": "实用工具",
+    "Recommended": "推荐", "All categories": "全部分类", "Search Marketplace": "搜索 Marketplace",
+    "Create a new extension": "创建新扩展",
+    "Enhance your workflow with extensions": "用扩展改善工作流程",
+    "Tools from the community and partners to simplify tasks and automate processes": "社区与合作伙伴提供的工具，可简化任务并自动化流程",
+    "View recommended or recent marketplace listings": "浏览推荐或最近添加的应用",
+    "Continuous integration and deploys with Render, the modern cloud for ambitious developers": "Render 提供持续集成与部署服务",
+    "Keep your Lovable project synced both ways": "双向同步你的 Lovable 项目",
+    "Review code and manage pull requests": "审查代码并管理 PR",
+    "Login to OpenCode through Github Copilot": "通过 GitHub Copilot 登录 OpenCode",
+    "Cut Code Review Time & Bugs in Half": "减少代码审查时间与错误",
+    "Cloud-based continuous integration and delivery for Android, iOS, Flutter, React Native, Ionic and Unity projects": "面向 Android、iOS、Flutter 等移动应用的云端持续集成与交付",
+    "Detect documentation drift by checking docs against repository files, commands, packages, workflows and configuration": "对照仓库文件与配置，检测文档是否过时",
+    "Test Node.js services for event-loop blocking, retry storms, backpressure, concurrency bugs, and broken shutdowns": "检测 Node.js 服务中的事件循环阻塞、并发错误等问题",
+    "Animated effects for your GitHub profile README, drawn from your own contributions and refreshed daily": "根据你的贡献记录，为个人资料 README 添加每日更新的动画",
+    "Analyze and modernize Go codebases using the official modernize diagnostic suite": "使用官方工具分析并更新 Go 代码",
+    "Zero-downtime Docker Compose deploys over SSH with docker-rollout — upload files, pull, migrate, roll out": "通过 SSH 和 Docker Compose 进行不停机部署",
+    "Transpile a .rl file to C with rlt (optionally compiled to a binary)": "将 .rl 文件转换为 C 代码",
+    "Run rl test on your repository using the RL language": "在仓库中运行 RL 语言测试",
+    "Install RL prebuilt binaries (no Rust toolchain needed)": "安装 RL 预编译程序，无需 Rust 工具链",
+    "Check formatting of .rl files with rl format": "检查 .rl 文件的格式",
+    "Automate SemVer bumping, changelog updates, and release notes extraction": "自动更新版本号、变更日志与发布说明"
   });
 
   const defaults = ["Issues", "Pull requests", "Actions", "Copilot", "README"];
@@ -63,12 +98,19 @@
   function translate(value) {
     const match = /^(\s*)(.*?)(\s*)$/s.exec(value);
     const label = match[2];
-    if (!Object.hasOwn(dictionary, label) || preserved.has(label)) return value;
-    return match[1] + dictionary[label] + match[3];
+    if (!Object.hasOwn(dictionary, label)) return value;
+    const result = preserved.has(label) && dictionary[label] !== label
+      ? `${dictionary[label]}（${label}）`
+      : dictionary[label];
+    return match[1] + result + match[3];
   }
 
   function eligible(element) {
-    return element && !element.closest(excluded) && Boolean(element.closest(uiAreas));
+    return element && !element.closest(excluded) && (
+      Boolean(element.closest(uiAreas)) ||
+      (location.pathname.startsWith("/marketplace") && Boolean(element.closest("main")) &&
+        !element.closest("a[href^='/marketplace/']"))
+    );
   }
 
   function translateText(node) {
